@@ -1,12 +1,16 @@
 import json
+import os
 import re
 from typing import List, Set
 from langchain_openai import ChatOpenAI
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0.7
-)
+def get_llm():
+    # This avoids crashing during import time
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0.7,
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
 
 
 def generate_questions_from_chunk(
@@ -76,6 +80,7 @@ CONTENT:
 {chunk_text}
 """
 
+    llm = get_llm()
     raw_response = llm.invoke(prompt).content
 
     # Clean accidental markdown
