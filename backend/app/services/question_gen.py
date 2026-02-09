@@ -117,7 +117,11 @@ CONTENT:
 """
 
     llm = get_llm()
-    raw_response = llm.invoke(prompt).content
+    try:
+        raw_response = llm.invoke(prompt).content
+    except Exception:
+        logger.exception("LLM invoke failed")
+        return []
 
     # Clean accidental markdown
     cleaned = re.sub(r"```json|```", "", raw_response).strip()
