@@ -143,6 +143,7 @@ CONTENT:
 
     # Clean accidental markdown
     cleaned = re.sub(r"```json|```", "", raw_response).strip()
+    uvicorn_logger.info("LLM raw response (first 1000 chars): %s", raw_response[:1000])
 
     questions = _parse_questions_json(cleaned, question_type)
     if not questions:
