@@ -1,8 +1,10 @@
-import json
+﻿import json
+import logging
 import os
 import re
 from typing import List, Set
 from langchain_openai import ChatOpenAI
+
 
 def get_llm():
     # This avoids crashing during import time
@@ -11,6 +13,40 @@ def get_llm():
         temperature=0.7,
         api_key=os.getenv("OPENAI_API_KEY")
     )
+
+
+logger = logging.getLogger(__name__)
+
+
+def _extract_json_object(text: str) -> str | None:
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        return None
+    return match.group(0)
+
+
+def _parse_questions_json(cleaned: str, question_type: str) -> List[dict]:
+    """
+    Best-effort parse. Returns list of question dicts or empty list.
+    """
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        extracted = _extract_json_object(cleaned)
+        if not extracted:
+            return []
+        try:
+            data = json.loads(extracted)
+        except json.JSONDecodeError:
+            return []
+
+    if not isinstance(data, dict):
+        return []
+
+    questions = data.get(question_type, [])
+    if not isinstance(questions, list):
+        return []
+    return questions
 
 
 def generate_questions_from_chunk(
@@ -86,12 +122,11 @@ CONTENT:
     # Clean accidental markdown
     cleaned = re.sub(r"```json|```", "", raw_response).strip()
 
-    try:
-        data = json.loads(cleaned)
-    except json.JSONDecodeError:
+    questions = _parse_questions_json(cleaned, question_type)
+    if not questions:
+        logger.warning("No questions parsed. Raw response: %s", raw_response[:1000])
         return []
 
-    questions = data.get(question_type, [])
     results = []
 
     for q in questions:
