@@ -27,20 +27,9 @@ def generate_questions_ai_driven(
             existing_questions=seen
         )
 
-        for q in questions[:remaining]:
-            question_text = q.get("question")
-
-            if not question_text:
-                continue
-
-            normalized = question_text.strip().lower()
-
-            if normalized not in seen:
-                seen.add(normalized)
-                collected.append(q)
-
-            if len(collected) >= total_questions:
-                break
+        collected.extend(questions[:remaining])
+        if len(collected) >= total_questions:
+            break
 
     return {
         question_type: collected
