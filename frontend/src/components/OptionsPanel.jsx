@@ -1,7 +1,4 @@
-export default function OptionsPanel({
-  options,
-  onChange
-}) {
+export default function OptionsPanel({ options, onChange }) {
   const update = (key, value) => {
     onChange((prev) => ({ ...prev, [key]: value }));
   };
