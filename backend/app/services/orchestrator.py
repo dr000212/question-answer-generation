@@ -1,4 +1,4 @@
-from app.services.question_gen import generate_questions_from_chunk
+﻿from app.services.question_gen import generate_questions_from_chunk
 
 
 def generate_questions_ai_driven(
@@ -24,10 +24,10 @@ def generate_questions_ai_driven(
             difficulty=difficulty,
             age_level=age_level,
             max_questions=remaining,
-            existing_questions=sorted(seen)  # 🔒 better for AI
+            existing_questions=seen
         )
 
-        for q in questions[:remaining]:  # 🔒 hard limit
+        for q in questions[:remaining]:
             question_text = q.get("question")
 
             if not question_text:
