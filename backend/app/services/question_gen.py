@@ -11,7 +11,8 @@ def get_llm():
     return ChatOpenAI(
         model="gpt-4o-mini",
         temperature=0.7,
-        api_key=os.getenv("OPENAI_API_KEY")
+        api_key=os.getenv("OPENAI_API_KEY"),
+        model_kwargs={"response_format": {"type": "json_object"}}
     )
 
 
@@ -54,6 +55,10 @@ def _parse_questions_json(cleaned: str, question_type: str) -> List[dict]:
     questions = data.get("questions")
     if isinstance(questions, list):
         return questions
+    if isinstance(questions, dict):
+        nested = questions.get(question_type)
+        if isinstance(nested, list):
+            return nested
 
     for value in data.values():
         if isinstance(value, list):
@@ -149,10 +154,30 @@ CONTENT:
     results = []
 
     for q in questions:
-        q_text = q.get("question", "").strip().lower()
-        if q_text and q_text not in existing_questions:
-            existing_questions.add(q_text)
-            results.append(q)
+        if isinstance(q, str):
+            q_text = q.strip()
+            q_obj = {"question": q_text}
+        elif isinstance(q, dict):
+            q_text = (
+                q.get("question")
+                or q.get("Question")
+                or q.get("question_text")
+                or ""
+            )
+            q_text = q_text.strip()
+            q_obj = q
+        else:
+            logger.warning("Skipping question with unexpected type: %s", type(q))
+            continue
+
+        if not q_text:
+            logger.warning("Skipping question with empty text: %s", q)
+            continue
+
+        normalized = q_text.lower()
+        if normalized not in existing_questions:
+            existing_questions.add(normalized)
+            results.append(q_obj)
 
     return results
 
