@@ -16,6 +16,7 @@ def get_llm():
 
 
 logger = logging.getLogger(__name__)
+uvicorn_logger = logging.getLogger("uvicorn.error")
 
 
 def _extract_json_object(text: str) -> str | None:
@@ -40,13 +41,25 @@ def _parse_questions_json(cleaned: str, question_type: str) -> List[dict]:
         except json.JSONDecodeError:
             return []
 
+    if isinstance(data, list):
+        return data
+
     if not isinstance(data, dict):
         return []
 
-    questions = data.get(question_type, [])
-    if not isinstance(questions, list):
-        return []
-    return questions
+    questions = data.get(question_type)
+    if isinstance(questions, list):
+        return questions
+
+    questions = data.get("questions")
+    if isinstance(questions, list):
+        return questions
+
+    for value in data.values():
+        if isinstance(value, list):
+            return value
+
+    return []
 
 
 def generate_questions_from_chunk(
@@ -128,7 +141,9 @@ CONTENT:
 
     questions = _parse_questions_json(cleaned, question_type)
     if not questions:
-        logger.warning("No questions parsed. Raw response: %s", raw_response[:1000])
+        msg = f"No questions parsed. Raw response: {raw_response[:1000]}"
+        logger.warning(msg)
+        uvicorn_logger.warning(msg)
         return []
 
     results = []
