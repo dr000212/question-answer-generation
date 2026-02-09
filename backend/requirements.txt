@@ -11,5 +11,6 @@ uvicorn==0.40.0
 youtube-transcript-api==0.6.1
 youtube-transcript-downloader==0.1.2
 yt-dlp==2026.2.4
+beautifulsoup4==4.14.3
 
 
