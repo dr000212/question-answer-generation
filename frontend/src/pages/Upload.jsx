@@ -162,7 +162,7 @@ export default function Upload() {
           Create smart practice questions from PDFs, websites
         </div>
         <div className="page-description">
-          Generate MCQs, fill-in-the-blanks, or long-answer questions with
+          Generate MCQs, fill-in-the-blanks, or Short-answer questions with
           adjustable difficulty and age level.
         </div>
         <div className="page-description">
