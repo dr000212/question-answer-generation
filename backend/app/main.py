@@ -23,7 +23,9 @@ def validate_env():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173",
+    "https://question-answer-generation.vercel.app",
+    "https://question-answer-generation-m13tx....vercel.app",]
     allow_methods=["*"],
     allow_headers=["*"],
 )
